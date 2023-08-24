@@ -1,0 +1,21 @@
+docker run -d --name node-exporter --network monitoring -p 9100:9100 \
+--restart unless-stopped \
+--volume /proc:/host/proc:ro \
+--volume /sys:/host/sys:ro \
+--volume /:/rootfs:ro \
+prom/node-exporter:latest \
+--path.procfs=/host/proc \
+--path.rootfs=/rootfs \
+--path.sysfs=/host/sys \
+--collector.filesystem.mount-points-exclude="^/(sys|proc|dev|host|etc)($$|/)"
+
+docker run -d --name prometheus --network monitoring -p 9090:9090 \
+--restart unless-stopped \
+--volume $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+--volume prometheus_data:/prometheus \
+prom/prometheus:latest \
+--config.file=/etc/prometheus/prometheus.yml \
+--storage.tsdb.path=/prometheus \
+--web.console.libraries=/etc/prometheus/console_libraries \
+--web.console.templates=/etc/prometheus/consoles \
+--web.enable-lifecycle
